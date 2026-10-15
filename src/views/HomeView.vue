@@ -5,19 +5,19 @@
     <router-link to="/SaisonData" class="season-box">
       <span>Saisons</span>
     </router-link>
-    <div class="season-box">
+    <router-link to="/FahrerData" class="season-box">
       <span>Fahrer</span>
-    </div>
-    <div class="season-box">
+    </router-link>
+    <router-link to="/TeamData" class="season-box">
       <span>Teams</span>
-    </div>
+    </router-link>
   </div>
 </template>
 
 <style scoped>
 .season-box {
   display: inline-table;
-  flex-direction:column;
+  flex-direction: column;
   gap: 4px;
   padding: 30px 30px;
   border: 2px solid #42b983;

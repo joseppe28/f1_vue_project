@@ -6,6 +6,21 @@ const routes = [
     path: '/',
     name: 'home',
     component: HomeView
+  },
+  {
+    path: '/SaisonData',
+    name: 'SaisonData',
+    component: () => import('../views/SaisonData.vue')
+  },
+  {
+    path: '/FahrerData',
+    name: 'FahrerData',
+    component: () => import('../views/FahrerData.vue')
+  },
+  {
+    path: '/TeamData',
+    name: 'TeamData',
+    component: () => import('../views/TeamData.vue')
   }
 ]
 
