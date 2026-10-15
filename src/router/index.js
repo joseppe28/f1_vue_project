@@ -21,6 +21,11 @@ const routes = [
     path: '/TeamData',
     name: 'TeamData',
     component: () => import('../views/TeamData.vue')
+  },
+  {
+    path: '/Race/:jahr/:runde',
+    name: 'Race',
+    component: () => import('../views/Race.vue')
   }
 ]
 

@@ -7,7 +7,12 @@
 
         <ul>
             <li v-for="rennen in saison.races" :key="rennen.raceId">
-                {{ rennen.round }} - {{ rennen.raceName }} ({{ rennen.circuit.circuitName }})
+                <router-link
+                    :to="{ name: 'Race', params: { jahr: jahr, runde: rennen.round } }"
+                    class="race-link"
+                >
+                    {{ rennen.round }} - {{ rennen.raceName }} ({{ rennen.circuit.circuitName }})
+                </router-link>
             </li>
         </ul>
 
@@ -70,6 +75,10 @@ export default {
     border-top-color: #42b983;
     border-radius: 50%;
     animation: drehen 0.8s linear infinite;
+}
+
+.race-link {
+    color: #2c3e50;
 }
 
 @keyframes drehen {

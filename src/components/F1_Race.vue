@@ -17,7 +17,6 @@
     <ul>
         <li> {{ race.winner.givenName }} {{ race.winner.familyName }} ({{ race.winner.nationality }}) </li>
         <li> {{ race.winner.constructor.name }} </li>
-        <li> {{ race.winner.time.time }} </li>
     </ul>
     <h2>Standings</h2>
     <ul>
