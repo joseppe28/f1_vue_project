@@ -1,8 +1,8 @@
 <template>
 	<h1>F1 Saison</h1>
-    <p v-if="!saison">Daten werden geladen ...</p>
+    <div v-if="loading" class="loading-spinner" role="status" aria-label="Saison wird geladen"></div>
 
-    <p v-else>
+    <p v-else-if="saison">
         <strong>{{ saison.season }}</strong> - {{ saison.races.length }} Rennen
 
         <ul>
@@ -24,11 +24,15 @@ export default {
     },
     data() {
         return {
-            saison: null
+            saison: null,
+            loading: false
         }
     },
     methods: {
         async ladeSaison() {
+            this.loading = true
+            this.saison = null
+
             try{
                 const response = await fetch(`https://f1api.dev/api/${this.jahr}`)
                 if (!response.ok) {
@@ -39,6 +43,9 @@ export default {
             }
             catch (error) {
                 console.error(error)
+            }
+            finally {
+                this.loading = false
             }
         }
     },
@@ -53,3 +60,21 @@ export default {
     name: 'F1_Saison'
 }
 </script>
+
+<style scoped>
+.loading-spinner {
+    width: 36px;
+    height: 36px;
+    margin: 20px 0;
+    border: 5px solid #d7eee3;
+    border-top-color: #42b983;
+    border-radius: 50%;
+    animation: drehen 0.8s linear infinite;
+}
+
+@keyframes drehen {
+    to {
+        transform: rotate(360deg);
+    }
+}
+</style>
