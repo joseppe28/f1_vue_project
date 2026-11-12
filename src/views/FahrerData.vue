@@ -136,85 +136,154 @@ export default {
 
 <style scoped>
 .fahrer-data {
-  padding: 20px;
+  width: min(100% - 48px, 980px);
+  margin: 0 auto;
+  padding: 60px 0 80px;
 }
 
-label,
-input {
-  display: block;
+h1 {
+  margin: 0 0 34px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2.8rem, 7vw, 5rem);
+  font-weight: normal;
 }
 
-input {
-  width: min(100%, 360px);
-  margin: 8px 0 20px;
-  padding: 8px;
+.fahrer-data > label {
+  display: inline-block;
+  margin-right: 12px;
+  color: #68717b;
+  font-size: 0.78rem;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+input,
+select {
+  padding: 12px;
+  border: 1px solid #d7d6d1;
+  background: #fff;
+  color: #17202d;
+  font: inherit;
 }
 
 select {
-  margin: 8px 0 20px;
-  padding: 8px;
+  width: 110px;
+  margin: 0 0 24px;
+}
+
+input {
+  display: block;
+  width: min(100%, 420px);
+  margin: 0 0 32px;
 }
 
 .fahrer-liste {
+  overflow: hidden;
   padding: 0;
+  border-top: 4px solid #17202d;
+  background: #fff;
   list-style: none;
 }
 
 .fahrer-liste li {
-  padding: 10px 0;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #e1e0db;
 }
 
 .fahrer-button {
-  display: flex;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 18px;
   width: 100%;
-  padding: 0;
+  padding: 18px 22px;
   border: 0;
   background: transparent;
-  color: inherit;
+  color: #17202d;
+  font: inherit;
   text-align: left;
   cursor: pointer;
+  transition: background 0.2s, padding 0.2s;
+}
+
+.fahrer-button:hover {
+  padding-left: 28px;
+  background: #f4f3ef;
+}
+
+.fahrer-button strong {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.15rem;
+  font-weight: normal;
 }
 
 .fahrer-button span {
-  color: #666;
+  color: #68717b;
+  font-size: 0.85rem;
 }
 
 .fahrer-details {
   display: grid;
-  gap: 6px;
-  margin: 12px 0 4px;
-  padding: 12px;
-  background: #f4f8f6;
+  gap: 9px;
+  margin: 0 22px 18px;
+  padding: 18px;
+  border-left: 3px solid #e53935;
+  background: #f4f3ef;
 }
 
 .fahrer-details div {
   display: flex;
-  gap: 12px;
+  gap: 16px;
 }
 
 .fahrer-details dt {
   min-width: 130px;
+  color: #68717b;
+  font-size: 0.78rem;
   font-weight: bold;
+  text-transform: uppercase;
 }
 
 .fahrer-details dd {
   margin: 0;
 }
 
+.fahrer-details a {
+  color: #e53935;
+  font-weight: bold;
+}
+
 .loading-spinner {
   width: 36px;
   height: 36px;
-  border: 5px solid #d7eee3;
-  border-top-color: #42b983;
+  border: 4px solid #d7d6d1;
+  border-top-color: #e53935;
   border-radius: 50%;
   animation: drehen 0.8s linear infinite;
 }
 
 @keyframes drehen {
-  to {
-    transform: rotate(360deg);
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 600px) {
+  .fahrer-data {
+    width: min(100% - 28px, 980px);
+    padding-top: 40px;
+  }
+
+  .fahrer-button {
+    grid-template-columns: 1fr auto;
+    gap: 5px 12px;
+  }
+
+  .fahrer-button span:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .fahrer-details div {
+    flex-direction: column;
+    gap: 3px;
   }
 }
 </style>
