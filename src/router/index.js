@@ -23,6 +23,11 @@ const routes = [
     component: () => import('../views/TeamData.vue')
   },
   {
+    path: '/Quiz',
+    name: 'Quiz',
+    component: () => import('../views/Quiz.vue')
+  },
+  {
     path: '/Race/:jahr/:runde',
     name: 'Race',
     component: () => import('../views/Race.vue')
