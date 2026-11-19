@@ -2,17 +2,14 @@
   <main class="team-data">
     <p class="eyebrow">03 / Paddock</p>
     <h1>Team <span>Daten</span></h1>
-    <section class="empty-state">
-      <span class="empty-number">03</span>
-      <div>
-        <h2>Das Fahrerlager wartet.</h2>
-        <p>Die Teamdaten werden als Nächstes ergänzt. Bis dahin kannst du im Saisonarchiv die Rennen und Konstrukteure entdecken.</p>
-        <router-link to="/SaisonData">Zum Saisonarchiv <span>→</span></router-link>
-      </div>
-    </section>
+    <F1_Standings teams />
   </main>
 </template>
 
+<script>
+import F1_Standings from '@/components/F1_Standings.vue'
+export default { components: { F1_Standings } }
+</script>
 <style scoped>
 .team-data {
   width: min(100% - 48px, 980px);

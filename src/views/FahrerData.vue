@@ -2,138 +2,57 @@
   <div class="fahrer-data">
     <h1>Fahrer Daten</h1>
     <label for="fahrer-jahr">Saison auswählen</label>
-    <select id="fahrer-jahr" v-model="ausgewaehltesJahr">
-      <option v-for="jahr in jahre" :key="jahr" :value="jahr">{{ jahr }}</option>
+    <select id="fahrer-jahr" v-model.number="jahr">
+      <option v-for="year in jahre" :key="year" :value="year">{{ year }}</option>
     </select>
-
-    <label for="fahrer-suche">Fahrer suchen (alle Saisons)</label>
-    <input
-      id="fahrer-suche"
-      v-model.trim="suchtext"
-      type="search"
-      placeholder="Name oder Fahrer-ID eingeben"
-    />
-
+    <label for="fahrer-suche">Fahrer suchen (gewählte Saison)</label>
+    <input id="fahrer-suche" v-model.trim="suche" type="search" placeholder="Name oder Startnummer">
     <div v-if="loading" class="loading-spinner" role="status" aria-label="Fahrer werden geladen"></div>
-    <p v-else-if="fehler">Die Fahrerdaten konnten nicht geladen werden.</p>
-    <p v-else-if="angezeigteFahrer.length === 0">Keine Fahrer gefunden.</p>
-
+    <p v-else-if="error" role="alert">{{ error }}</p>
+    <p v-else-if="!gefiltert.length">Keine Fahrer gespeichert.</p>
     <ul v-else class="fahrer-liste">
-      <li v-for="fahrer in angezeigteFahrer" :key="fahrer.driverId">
-        <button class="fahrer-button" type="button" @click="umschalten(fahrer.driverId)">
-          <strong>{{ fahrer.name }} {{ fahrer.surname }}</strong>
-          <span v-if="fahrer.number">Nr. {{ fahrer.number }}</span>
-          <span v-if="fahrer.nationality">{{ fahrer.nationality }}</span>
+      <li v-for="driver in gefiltert" :key="driver.driver_number">
+        <button class="fahrer-button" @click="offen = offen === driver.driver_number ? null : driver.driver_number">
+          <strong>{{ driver.full_name }}</strong><span>Nr. {{ driver.driver_number }}</span>
         </button>
-
-        <dl v-if="ausgeklappterFahrer === fahrer.driverId" class="fahrer-details">
-          <div><dt>Fahrer-ID</dt><dd>{{ fahrer.driverId }}</dd></div>
-          <div><dt>Geburtstag</dt><dd>{{ fahrer.birthday || 'Nicht vorhanden' }}</dd></div>
-          <div><dt>Nationalität</dt><dd>{{ fahrer.nationality || 'Nicht vorhanden' }}</dd></div>
-          <div><dt>Team-ID</dt><dd>{{ fahrer.teamId || 'Nicht vorhanden' }}</dd></div>
-          <div v-if="fahrer.url"><dt>Weitere Informationen</dt><dd><a :href="fahrer.url" target="_blank" rel="noopener">Wikipedia</a></dd></div>
+        <dl v-if="offen === driver.driver_number" class="fahrer-details">
+          <div><dt>Team</dt><dd>{{ driver.team_name || 'Nicht vorhanden' }}</dd></div>
         </dl>
       </li>
     </ul>
+    <p>Teamzuordnung aus dem letzten gespeicherten Einsatz des Fahrers in dieser Saison.</p>
   </div>
 </template>
-
 <script>
+import { getF1 } from '@/services/f1'
 export default {
-  name: 'FahrerData',
-  data() {
-    return {
-      fahrer: [],
-      saisonFahrer: [],
-      ausgewaehltesJahr: 2024,
-      suchtext: '',
-      ausgeklappterFahrer: null,
-      loading: true,
-      fehler: false
-    }
-  },
+  data: () => ({ jahr: 2024, suche: '', fahrer: [], offen: null, loading: false, error: null, requestId: 0 }),
   computed: {
-    jahre() {
-      return Array.from({ length: 2025 - 1950 + 1 }, (_, index) => 2025 - index)
-    },
-    gefilterteFahrer() {
-      const suche = this.suchtext.toLowerCase()
-
-      return this.fahrer.filter((fahrer) => {
-        const fahrerText = [fahrer.name, fahrer.surname, fahrer.driverId]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase()
-
-        return fahrerText.includes(suche)
-      })
-    },
-    angezeigteFahrer() {
-      return this.suchtext ? this.gefilterteFahrer : this.saisonFahrer
-    }
+    jahre() { return Array.from({ length: new Date().getFullYear() - 2022 }, (_, i) => new Date().getFullYear() - i) },
+    gefiltert() { return this.fahrer.filter(d => (d.full_name + ' ' + d.driver_number).toLowerCase().includes(this.suche.toLowerCase())) }
   },
+  watch: { jahr: { immediate: true, handler: 'laden' } },
   methods: {
-    async ladeAlleFahrer() {
-      const fahrer = []
-      const limit = 100
-      let offset = 0
-
-      while (true) {
-        const response = await fetch(`https://f1api.dev/api/drivers?limit=${limit}&offset=${offset}`)
-        if (!response.ok) {
-          throw new Error('Die globale Fahrerliste konnte nicht geladen werden.')
-        }
-
-        const data = await response.json()
-        const seite = data.drivers || []
-        fahrer.push(...seite)
-
-        if (seite.length < limit) {
-          return fahrer
-        }
-
-        offset += limit
-      }
-    },
-    async ladeFahrer() {
+    async laden() {
+      const id = ++this.requestId
       this.loading = true
-      this.fehler = false
-      this.ausgeklappterFahrer = null
-
+      this.error = null
+      this.offen = null
       try {
-        const [alleFahrer, saisonAntwort] = await Promise.all([
-          this.ladeAlleFahrer(),
-          fetch(`https://f1api.dev/api/${this.ausgewaehltesJahr}/drivers`)
-        ])
-        if (!saisonAntwort.ok) {
-          throw new Error('Die Fahrerdaten konnten nicht geladen werden.')
+        const season = await getF1('/seasons/' + this.jahr)
+        const drivers = new Map()
+        for (const race of season.races) {
+          if (id !== this.requestId) return
+          const entries = await getF1('/drivers/' + race.session_key)
+          for (const driver of entries) drivers.set(driver.driver_number, driver)
         }
-
-        const saison = await saisonAntwort.json()
-        this.fahrer = alleFahrer
-        this.saisonFahrer = saison.drivers || []
-      } catch (error) {
-        console.error(error)
-        this.fehler = true
-      } finally {
-        this.loading = false
-      }
-    },
-    umschalten(driverId) {
-      this.ausgeklappterFahrer = this.ausgeklappterFahrer === driverId ? null : driverId
-    }
-  },
-  async mounted() {
-    await this.ladeFahrer()
-  },
-  watch: {
-    async ausgewaehltesJahr() {
-      await this.ladeFahrer()
+        if (id === this.requestId) this.fahrer = [...drivers.values()]
+      } catch (error) { if (id === this.requestId) this.error = error.message }
+      finally { if (id === this.requestId) this.loading = false }
     }
   }
 }
 </script>
-
 <style scoped>
 .fahrer-data {
   width: min(100% - 48px, 980px);

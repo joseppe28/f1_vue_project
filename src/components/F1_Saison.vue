@@ -2,20 +2,21 @@
     <section class="season-panel">
         <div v-if="loading" class="loading-spinner" role="status" aria-label="Saison wird geladen"></div>
 
+        <p v-else-if="error" role="alert">{{ error }}</p>
         <template v-else-if="saison">
             <header class="season-summary">
                 <div>
                     <p class="panel-label">Saisonübersicht</p>
-                    <h2>{{ saison.season }}</h2>
+                    <h2>{{ saison.year }}</h2>
                 </div>
                 <div class="race-count"><strong>{{ saison.races.length }}</strong><span>Rennen</span></div>
             </header>
 
             <ul class="race-list">
-                <li v-for="rennen in saison.races" :key="rennen.raceId">
+                <li v-for="rennen in saison.races" :key="rennen.session_key">
                     <router-link :to="{ name: 'Race', params: { jahr: jahr, runde: rennen.round } }" class="race-link">
                         <span class="race-round">{{ String(rennen.round).padStart(2, '0') }}</span>
-                        <span class="race-name"><strong>{{ rennen.raceName }}</strong><small>{{ rennen.circuit.circuitName }}</small></span>
+                        <span class="race-name"><strong>{{ rennen.meeting_name }}</strong><small>{{ rennen.circuit_short_name }}</small></span>
                         <span class="race-arrow">→</span>
                     </router-link>
                 </li>

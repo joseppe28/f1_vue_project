@@ -1,29 +1,22 @@
 <template>
-    <h1>F1 Rennen</h1>
-    <p v-if="!race">Daten werden geladen ...</p>
-
-    <p v-else>
-        <strong>{{ race.raceName }}</strong> - {{ race.date }} ({{ race.circuit.circuitName }})
-    </p>
-
-    <h1>Streckeninformationen</h1>
-    <h2>Location</h2>
-    <ul>
-        <li> {{ race.circuit.location }} </li>
-        <li> {{ race.circuit.country }} </li>
-        <li> {{ race.circuit.lat }} / {{ race.circuit.lng }} </li>
+  <h1>F1 Rennen</h1>
+  <p v-if="loading" role="status">Daten werden geladen …</p>
+  <p v-else-if="error" role="alert">{{ error }}</p>
+  <template v-else-if="race">
+    <h2>{{ race.meeting_name }}</h2>
+    <p>{{ race.date_start ? new Date(race.date_start).toLocaleString('de-AT') : 'Datum nicht verfügbar' }}</p>
+    <h2>Streckeninformationen</h2>
+    <p>{{ race.circuit_short_name }} – {{ race.country_name }}</p>
+    <h2>Rennergebnis</h2>
+    <p v-if="!sortedResults.length">Noch kein Ergebnis gespeichert.</p>
+    <ul v-else>
+      <li v-for="result in sortedResults" :key="result.driver_number">
+        {{ result.position ?? '–' }} – {{ driver(result.driver_number).full_name || result.driver_number }}
+        ({{ driver(result.driver_number).team_name || 'Team unbekannt' }}) – {{ result.number_of_laps ?? '–' }} Runden
+        {{ result.dsq ? 'DSQ' : result.dns ? 'DNS' : result.dnf ? 'DNF' : '' }}
+      </li>
     </ul>
-    <h2>Winner</h2>
-    <ul>
-        <li> {{ race.winner.givenName }} {{ race.winner.familyName }} ({{ race.winner.nationality }}) </li>
-        <li> {{ race.winner.constructor.name }} </li>
-    </ul>
-    <h2>Standings</h2>
-    <ul>
-        <li v-for="standing in race.standings" :key="standing.position">
-            {{ standing.position }} - {{ standing.Driver.givenName }} {{ standing.Driver.familyName }} ({{ standing.Constructor.name }}) - {{ standing.points }} Punkte
-        </li>
-    </ul>
+  </template>
 </template>
 <script>
 import { getF1 } from '@/services/f1'
