@@ -1,89 +1,35 @@
 <template>
-	<h1>F1 Saison</h1>
-    <div v-if="loading" class="loading-spinner" role="status" aria-label="Saison wird geladen"></div>
-
-    <p v-else-if="saison">
-        <strong>{{ saison.season }}</strong> - {{ saison.races.length }} Rennen
-
-        <ul>
-            <li v-for="rennen in saison.races" :key="rennen.raceId">
-                <router-link
-                    :to="{ name: 'Race', params: { jahr: jahr, runde: rennen.round } }"
-                    class="race-link"
-                >
-                    {{ rennen.round }} - {{ rennen.raceName }} ({{ rennen.circuit.circuitName }})
-                </router-link>
-            </li>
-        </ul>
-
-    </p>
-
+  <h1>F1 Saison</h1>
+  <p v-if="loading" role="status">Saison wird geladen …</p>
+  <p v-else-if="error" role="alert">{{ error }}</p>
+  <div v-else-if="saison">
+    <strong>{{ saison.year }} – {{ saison.races.length }} Rennen</strong>
+    <ul>
+      <li v-for="rennen in saison.races" :key="rennen.session_key">
+        <router-link :to="{ name: 'Race', params: { jahr, runde: rennen.round } }">
+          {{ rennen.round }} – {{ rennen.meeting_name }} ({{ rennen.circuit_short_name }})
+        </router-link>
+      </li>
+    </ul>
+  </div>
 </template>
 <script>
+import { getF1 } from '@/services/f1'
 export default {
-    props: {
-        jahr: {
-            type: [Number, String],
-            required: true
-        }
-    },
-    data() {
-        return {
-            saison: null,
-            loading: false
-        }
-    },
-    methods: {
-        async ladeSaison() {
-            this.loading = true
-            this.saison = null
-
-            try{
-                const response = await fetch(`https://f1api.dev/api/${this.jahr}`)
-                if (!response.ok) {
-                    throw new Error('Die Daten konnten nicht geladen werden.')
-            }
-
-                this.saison = await response.json()
-            }
-            catch (error) {
-                console.error(error)
-            }
-            finally {
-                this.loading = false
-            }
-        }
-    },
-    async mounted() {
-        await this.ladeSaison()
-    },
-    watch: {
-        async jahr() {
-            await this.ladeSaison()
-        }
-    },
-    name: 'F1_Saison'
+  props: { jahr: { type: [Number, String], required: true } },
+  data: () => ({ saison: null, loading: false, error: null, requestId: 0 }),
+  watch: { jahr: { immediate: true, handler: 'laden' } },
+  methods: {
+    async laden() {
+      const id = ++this.requestId
+      this.loading = true
+      this.error = null
+      try {
+        const data = await getF1(`/seasons/${this.jahr}`)
+        if (id === this.requestId) this.saison = data
+      } catch (error) { if (id === this.requestId) this.error = error.message }
+      finally { if (id === this.requestId) this.loading = false }
+    }
+  }
 }
 </script>
-
-<style scoped>
-.loading-spinner {
-    width: 36px;
-    height: 36px;
-    margin: 20px 0;
-    border: 5px solid #d7eee3;
-    border-top-color: #42b983;
-    border-radius: 50%;
-    animation: drehen 0.8s linear infinite;
-}
-
-.race-link {
-    color: #2c3e50;
-}
-
-@keyframes drehen {
-    to {
-        transform: rotate(360deg);
-    }
-}
-</style>

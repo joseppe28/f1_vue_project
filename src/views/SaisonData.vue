@@ -4,7 +4,7 @@
         <p>Hier kannst du ein Jahr auswählen:</p>
 
         <label for="jahr">Jahr</label>
-        <input id="jahr" v-model.number="jahr" type="number" min="1950" max="2026">
+        <input id="jahr" v-model.number="jahr" type="number" min="2023" :max="new Date().getFullYear()">
         <button type="button" @click="ausgewaehltesJahr = jahr">Saison laden</button>
 
         <F1_Saison :jahr="ausgewaehltesJahr" />

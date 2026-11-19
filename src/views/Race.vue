@@ -1,8 +1,7 @@
 <template>
   <div class="race">
-    <div v-if="loading" class="loading-spinner" role="status" aria-label="Rennen wird geladen"></div>
-    <F1_Race v-else-if="rennen" :race="rennen" />
-    <p v-else>Die Renndaten konnten nicht geladen werden.</p>
+    <h1>Rennen {{ runde || 'nicht verfügbar' }}</h1>
+    <F1_Race :jahr="jahr" :runde="runde" />
   </div>
 </template>
 
@@ -14,28 +13,9 @@ export default {
   components: {
     F1_Race
   },
-  data() {
-    return {
-      jahr: this.$route.params.jahr,
-      runde: this.$route.params.runde,
-      rennen: null,
-      loading: true
-    }
-  },
-  async mounted() {
-    try {
-      const response = await fetch(`https://f1api.dev/api/${this.jahr}`)
-      if (!response.ok) {
-        throw new Error('Die Renndaten konnten nicht geladen werden.')
-      }
-
-      const data = await response.json()
-      this.rennen = data.races.find((race) => String(race.round) === String(this.runde))
-    } catch (error) {
-      console.error(error)
-    } finally {
-      this.loading = false
-    }
+  computed: {
+    jahr() { return this.$route.params.jahr },
+    runde() { return this.$route.params.runde }
   }
 }
 </script>
